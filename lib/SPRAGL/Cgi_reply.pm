@@ -374,6 +374,7 @@ L<redirect|/redirect( $u )>,
 L<reply|/reply( $s )>,
 L<reply_html|/reply_html( $s )>,
 L<reply_json|/reply_json( $hr )>,
+L<csystem|/csystem( $c )>,
 L<cexec|/cexec ...>
 
 Loaded on demand:
@@ -442,6 +443,7 @@ Examples:
 =head1 DEPENDENCIES
 
 File::Spec
+
 JSON
 
 =head1 KNOWN ISSUES
@@ -453,12 +455,15 @@ No known issues.
 =head1 SEE ALSO
 
 L<SPRAGL::Cgi_read|https://metacpan.org/pod/SPRAGL::Cgi_read>
+
 L<CGI|https://metacpan.org/pod/CGI>
 
 =head1 LICENSE & COPYRIGHT
 
 (c) 2022-2023 Bjrn Hee
+
 Licensed under the Apache License, version 2.0
+
 https://www.apache.org/licenses/LICENSE-2.0.txt
 
 =cut
