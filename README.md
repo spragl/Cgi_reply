@@ -4,7 +4,7 @@ SPRAGL::Cgi\_reply - Simple HTTP replies.
 
 # VERSION
 
-1.10
+1.11
 
 # SYNOPSIS
 
@@ -81,7 +81,7 @@ Loaded on demand:
 
 ## OPTIONAL NAMED PARAMETERS
 
-Optional named parameters can be given in the reply calls. If the name is "redirect" the reply will be like calling redirect. If the name is anything else, a header with that name and value will be inserted in the reply.
+Optional named parameters can be given in the reply calls. If the name is "redirect" the reply will be like calling the redirect method. If the name is anything else, a header with that name and value will be inserted in the reply. The header will be normalized, by capitalizing words and changing underscores to dashes. The header value will be inserted raw. Be sure to adhere to RFC 8187.
 
 Examples:
 
@@ -111,7 +111,7 @@ No known issues.
 
 # LICENSE & COPYRIGHT
 
-(c) 2022-2023 Bjrn Hee
+(c) 2022-2023 Bjørn Hee
 
 Licensed under the Apache License, version 2.0
 

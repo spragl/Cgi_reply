@@ -1,6 +1,6 @@
 # SPRAGL::Cgi_reply.pm
 # Simple HTTP replies.
-# (c) 2022-2023 Bjrn Hee
+# (c) 2022-2023 Bjørn Hee
 # Licensed under the Apache License, version 2.0
 # https://www.apache.org/licenses/LICENSE-2.0.txt
 
@@ -10,12 +10,14 @@ use strict;
 use experimental qw(signatures);
 use Exporter qw(import);
 
-our $VERSION = 1.10;
+our $VERSION = 1.11;
 
 use File::Spec ();
 use JSON qw(encode_json);
 
-our @EXPORT = qwac('
+my sub qwac( $s ) {grep{/./} map{split /\s+/} map{s/#.*//r} split/\v+/ , $s;};
+
+our @EXPORT = qwac '
     fail       # Send reply code and text.
     redirect   # Redirect to URL.
     reply      # Send reply and exit.
@@ -23,11 +25,11 @@ our @EXPORT = qwac('
     reply_json # Send JSON reply and exit.
     csystem    # CGI system command.
     cexec      # CGI exec command.
-    ');
+    ';
 
-our @EXPORT_OK = qwac('
+our @EXPORT_OK = qwac '
     %status_code # Common status code messages.
-    ');
+    ';
 
 # --------------------------------------------------------------------------- #
 # Globals and defaults.
@@ -101,16 +103,6 @@ my %header = (
     Status => '200 OK' ,
     );
 
-
-sub qwac( $s ) {
-# qw-like sub, allow comments.
-    return
-        grep {/./}
-        map { split /\s+/ }
-        map { s/#.*//r }
-        split /\v+/ , $s;
-    };
-
 # --------------------------------------------------------------------------- #
 # Private methods.
 
@@ -118,7 +110,7 @@ my $cr;
 my $cx; # For holding a cexec command.
 
 
-my $hnorm = sub( $h ) {
+my sub hnorm( $h ) {
 # Normalize header name. Uppercase the start letters, lowercase all the other.
 # Remove illegal characters. Change underscores into dashes per convention.
     return $h =~
@@ -128,7 +120,7 @@ my $hnorm = sub( $h ) {
     };
 
 
-my $timestring = sub( $t = time ) { # $t in epoch seconds
+my sub timestring( $t = time ) { # $t in epoch seconds
 # Returns for example 1970-01-01 00:00:00
     return if not defined $t;
     return if $t !~ m/^\d+$/;
@@ -139,8 +131,8 @@ my $timestring = sub( $t = time ) { # $t in epoch seconds
     };
 
 
-my $print_headers = sub() {
-    $header{Date} //= $timestring->();
+my sub print_headers() {
+    $header{Date} //= timestring;
     for my $h (keys %header) {
         print $h.': '.$header{$h}."\r\n";
         };
@@ -148,13 +140,13 @@ my $print_headers = sub() {
     };
 
 
-my $cdie = sub( $msg ) {
+my sub cdie( $msg ) {
     warn $msg;
     fail(500);
     };
 
 
-my $cexit = sub() {
+my sub cexit() {
 
     if ($cr != 1) {
         $cr = 1;
@@ -165,7 +157,7 @@ my $cexit = sub() {
 
         # fork this process
         my $pid = fork();
-        $cdie->('SPRAGL::Cgi_reply::cexec failed: '.$!)
+        cdie 'SPRAGL::Cgi_reply::cexec failed: '.$!
           if not defined $pid;
 
         if ($pid == 0) {
@@ -188,41 +180,41 @@ my $cexit = sub() {
     };
 
 
-my $rcheck = sub() {
+my sub rcheck() {
 # Check redirection, and handle it if set.
 
     if (not exists $header{Location}) {
         return if $header{Status} !~ m/^30[1278]\b/;
-        $cdie->('Redirection URI missing.');
+        cdie 'Redirection URI missing.';
         };
     $header{Status} = '302 '.$status_code{302}
       if $header{Status} !~ m/^30[1278]\s/;
 
     $header{'Content-Type'} = 'text/html; charset=utf-8';
-    $print_headers->();
+    print_headers;
     print
         '<html><head></head><body>'.
         '<a href="'.$header{Location}.'">'.
         $header{Location}.
         '</a>'.
         '</body></html>';
-    $cexit->();
+    cexit;
     };
 
 
-my $signature = sub( $mp , $op , @par ) {
+my sub signature( $mp , $op , @par ) {
 # Tailor-made signature-like parameter slurping.
 
     # Handle object parameter if there is one.
     if (defined $cr) {
-        $cdie->('Multiple calls of cexec.') if $cr == 1;
-        $cdie->('Error in cexec.') if $par[0] ne $cr;
+        cdie 'Multiple calls of cexec.' if $cr == 1;
+        cdie 'Error in cexec.' if $par[0] ne $cr;
         shift @par;
         $cr = 1;
         };
 
     # Take the mandatory parameters to the side.
-    $cdie->('Too few arguments for subroutine.')
+    cdie 'Too few arguments for subroutine.'
       if scalar @par < $mp;
     my @ret = splice @par , 0 , $mp;
 
@@ -237,23 +229,25 @@ my $signature = sub( $mp , $op , @par ) {
         };
 
     # Update the header hash with any named parameters left.
-    $cdie->('Error in optional named parameters.')
+    cdie 'Error in optional named parameters.'
       if (scalar @par) % 2 == 1;
     while (@par) {
         my $key = shift @par;
         my $val = shift @par;
+        $val =~ s/\v+$//;
+        cdie 'Header value contains newline.' if $val =~ m/\n/;
         if ($key =~ m/^redirect$/i) {
             $header{Status} = '302 '.$status_code{302};
             $header{Location} = $val;
             }
         else {
-            $header{$hnorm->($key)} = $val;
+            $header{hnorm($key)} = $val;
             };
         };
 
     return @ret;
 
-    }; # sub $signature
+    }; # sub signature
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
@@ -266,52 +260,52 @@ sub fail {
 # Send status code and text. Also works with "200 OK". Also works with
 # redirects, for which the second parameter must be the URI redirected to.
 
-    my ($code,$text) = $signature->(1,1,@_);
-    $cdie->('Unknown return code "'.$code.'".')
+    my ($code,$text) = signature(1,1,@_);
+    cdie 'Unknown return code "'.$code.'".'
       if not exists $status_code{$code};
     $header{Status} = $code.' '.$status_code{$code};
-    $rcheck->();
-    $print_headers->();
+    rcheck;
+    print_headers;
     print $text // $code.' '.$status_code{$code};
-    $cexit->();
+    cexit;
     };
 
 
 sub redirect {
 # Redirect to the given URI.
-    my ($uri) = $signature->(1,0,@_);
+    my ($uri) = signature(1,0,@_);
     $header{Status} = '302 '.$status_code{302};
     $header{Location} = $uri;
-    $rcheck->();
+    rcheck;
     };
 
 
 sub reply {
-    my ($text) = $signature->(1,0,@_);
-    $rcheck->();
-    $print_headers->();
+    my ($text) = signature(1,0,@_);
+    rcheck;
+    print_headers;
     print $text;
-    $cexit->();
+    cexit;
     };
 
 
 sub reply_html {
-    my ($doc) = $signature->(1,0,@_);
+    my ($doc) = signature(1,0,@_);
     $header{'Content-Type'} = 'text/html; charset=utf-8';
-    $rcheck->();
-    $print_headers->();
+    rcheck;
+    print_headers;
     print $doc;
-    $cexit->();
+    cexit;
     };
 
 
 sub reply_json {
-    my ($hashref) = $signature->(1,0,@_);
+    my ($hashref) = signature(1,0,@_);
     $header{'Content-Type'} = 'application/json; charset=utf-8';
-    $rcheck->();
-    $print_headers->();
+    rcheck;
+    print_headers;
     print encode_json($hashref);
-    $cexit->();
+    cexit;
     };
 
 
@@ -321,14 +315,14 @@ sub csystem( $c ) {
         $out = qx[start /b ${c}];
         }
     else {
-        $out = qx[${c} &];
+        $out = qx[${c} 2>/dev/null];
         };
     return $out;
     };
 
 
 sub cexec( $c ) {
-    $cdie->('Undefined command given to cexec.') if not defined $c;
+    cdie 'Undefined command given to cexec.' if not defined $c;
     $cx = $c;
     my $sr;
     $sr->$* = undef;
@@ -349,7 +343,7 @@ SPRAGL::Cgi_reply - Simple HTTP replies.
 
 =head1 VERSION
 
-1.10
+1.11
 
 =head1 SYNOPSIS
 
@@ -430,7 +424,7 @@ Only loaded on demand.
 
 =head2 OPTIONAL NAMED PARAMETERS
 
-Optional named parameters can be given in the reply calls. If the name is "redirect" the reply will be like calling redirect. If the name is anything else, a header with that name and value will be inserted in the reply.
+Optional named parameters can be given in the reply calls. If the name is "redirect" the reply will be like calling the redirect method. If the name is anything else, a header with that name and value will be inserted in the reply. The header will be normalized, by capitalizing words and changing underscores to dashes. The header value will be inserted raw. Be sure to adhere to RFC 8187.
 
 Examples:
 
@@ -460,7 +454,7 @@ L<CGI|https://metacpan.org/pod/CGI>
 
 =head1 LICENSE & COPYRIGHT
 
-(c) 2022-2023 Bjrn Hee
+(c) 2022-2023 Bjørn Hee
 
 Licensed under the Apache License, version 2.0
 

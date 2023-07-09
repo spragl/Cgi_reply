@@ -34,7 +34,7 @@
 
 <h1 id="VERSION">VERSION</h1>
 
-<p>1.10</p>
+<p>1.11</p>
 
 <h1 id="SYNOPSIS">SYNOPSIS</h1>
 
@@ -123,7 +123,7 @@
 
 <h2 id="OPTIONAL-NAMED-PARAMETERS">OPTIONAL NAMED PARAMETERS</h2>
 
-<p>Optional named parameters can be given in the reply calls. If the name is &quot;redirect&quot; the reply will be like calling redirect. If the name is anything else, a header with that name and value will be inserted in the reply.</p>
+<p>Optional named parameters can be given in the reply calls. If the name is &quot;redirect&quot; the reply will be like calling the redirect method. If the name is anything else, a header with that name and value will be inserted in the reply. The header will be normalized, by capitalizing words and changing underscores to dashes. The header value will be inserted raw. Be sure to adhere to RFC 8187.</p>
 
 <p>Examples:</p>
 
@@ -153,7 +153,7 @@
 
 <h1 id="LICENSE-COPYRIGHT">LICENSE &amp; COPYRIGHT</h1>
 
-<p>(c) 2022-2023 Bjrn Hee</p>
+<p>(c) 2022-2023 Bj&oslash;rn Hee</p>
 
 <p>Licensed under the Apache License, version 2.0</p>
 
