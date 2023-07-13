@@ -19,13 +19,14 @@ name: SPRAGL-Cgi_reply
 provides:
   SPRAGL::Cgi_reply:
     file: lib/SPRAGL/Cgi_reply.pm
-    version: '1.11'
+    version: '1.21'
 requires:
+  File::Basename: '0'
   File::Spec: '0'
   JSON: '0'
 resources:
   bugtracker: https://github.com/spragl/Cgi_reply/issues
   license: http://apache.org/licenses/LICENSE-2.0
   repository: https://github.com/spragl/Cgi_reply
-version: '1.11'
+version: '1.21'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'

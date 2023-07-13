@@ -12,8 +12,9 @@ Module::Build->new(
     create_makefile_pl  => 0 ,
     create_readme       => 0 ,
     requires            => {
-        'File::Spec'  => 0 ,
-        'JSON'        => 0 ,
+        'File::Basename'  => 0 ,
+        'File::Spec'      => 0 ,
+        'JSON'            => 0 ,
         } ,
     test_requires       => {
         'Capture::Tiny'   => 0 ,

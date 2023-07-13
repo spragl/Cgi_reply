@@ -10,9 +10,10 @@ use strict;
 use experimental qw(signatures);
 use Exporter qw(import);
 
-our $VERSION = 1.11;
+our $VERSION = 1.21;
 
 use File::Spec ();
+use File::Basename qw(basename);
 use JSON qw(encode_json);
 
 my sub qwac( $s ) {grep{/./} map{split /\s+/} map{s/#.*//r} split/\v+/ , $s;};
@@ -21,6 +22,7 @@ our @EXPORT = qwac '
     fail       # Send reply code and text.
     redirect   # Redirect to URL.
     reply      # Send reply and exit.
+    reply_file # Send file and exit.
     reply_html # Send HTML reply and exit.
     reply_json # Send JSON reply and exit.
     csystem    # CGI system command.
@@ -289,6 +291,24 @@ sub reply {
     };
 
 
+sub reply_file {
+    my ($filename) = signature(1,0,@_);
+    fail 404 if not -f $filename;
+    $header{'Content-Type'} = 'application/octet-stream';
+    $header{'Content-Length'} = -s $filename;
+    $header{'Content-Disposition'} = 'attachment; filename="'.basename($filename).'"';
+    rcheck;
+    print_headers;
+    open my $fh , '<' , $filename || fail 500;
+    { # localizing lineseparator change
+        local $/ = undef;
+        print <$fh>;
+        };
+    close $fh;
+    cexit;
+    };
+
+
 sub reply_html {
     my ($doc) = signature(1,0,@_);
     $header{'Content-Type'} = 'text/html; charset=utf-8';
@@ -343,7 +363,7 @@ SPRAGL::Cgi_reply - Simple HTTP replies.
 
 =head1 VERSION
 
-1.11
+1.21
 
 =head1 SYNOPSIS
 
@@ -366,7 +386,8 @@ Loaded by default:
 L<fail|/fail( $c )>,
 L<redirect|/redirect( $u )>,
 L<reply|/reply( $s )>,
-L<reply_html|/reply_html( $s )>,
+L<reply_file|/reply_file( $fn )>,
+L<reply_html|/reply_html( $d )>,
 L<reply_json|/reply_json( $hr )>,
 L<csystem|/csystem( $c )>,
 L<cexec|/cexec ...>
@@ -390,7 +411,11 @@ Replies with a 302 redirect to the given URI, and then exits.
 
 Replies with the given string as plain/text, and then exits.
 
-=item reply_html( $s )
+=item reply_file( $fn )
+
+Replies with the file content pointed to by the given filename, and then exits.
+
+=item reply_html( $d )
 
 Replies with the given string as HTML, and then exits.
 
@@ -435,6 +460,8 @@ Examples:
     fail 308 , redirect => 'https://perlmaven.com/'; # Redirecting with another code than 302.
 
 =head1 DEPENDENCIES
+
+File::Basename
 
 File::Spec
 

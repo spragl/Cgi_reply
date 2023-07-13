@@ -4,7 +4,7 @@ SPRAGL::Cgi\_reply - Simple HTTP replies.
 
 # VERSION
 
-1.11
+1.21
 
 # SYNOPSIS
 
@@ -27,7 +27,8 @@ Loaded by default:
 [fail](#fail-c),
 [redirect](#redirect-u),
 [reply](#reply-s),
-[reply\_html](#reply_html-s),
+[reply\_file](#reply_file-fn),
+[reply\_html](#reply_html-d),
 [reply\_json](#reply_json-hr),
 [csystem](#csystem-c),
 [cexec](#cexec)
@@ -49,7 +50,11 @@ Loaded on demand:
 
     Replies with the given string as plain/text, and then exits.
 
-- reply\_html( $s )
+- reply\_file( $fn )
+
+    Replies with the file content pointed to by the given filename, and then exits.
+
+- reply\_html( $d )
 
     Replies with the given string as HTML, and then exits.
 
@@ -92,6 +97,8 @@ Examples:
     fail 308 , redirect => 'https://perlmaven.com/'; # Redirecting with another code than 302.
 
 # DEPENDENCIES
+
+File::Basename
 
 File::Spec
 

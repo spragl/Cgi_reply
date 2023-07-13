@@ -34,7 +34,7 @@
 
 <h1 id="VERSION">VERSION</h1>
 
-<p>1.11</p>
+<p>1.21</p>
 
 <h1 id="SYNOPSIS">SYNOPSIS</h1>
 
@@ -53,7 +53,7 @@
 
 <h1 id="FUNCTIONS-AND-VARIABLES">FUNCTIONS AND VARIABLES</h1>
 
-<p>Loaded by default: <a href="#fail-c">fail</a>, <a href="#redirect-u">redirect</a>, <a href="#reply-s">reply</a>, <a href="#reply_html-s">reply_html</a>, <a href="#reply_json-hr">reply_json</a>, <a href="#csystem-c">csystem</a>, <a href="#cexec">cexec</a></p>
+<p>Loaded by default: <a href="#fail-c">fail</a>, <a href="#redirect-u">redirect</a>, <a href="#reply-s">reply</a>, <a href="#reply_file-fn">reply_file</a>, <a href="#reply_html-d">reply_html</a>, <a href="#reply_json-hr">reply_json</a>, <a href="#csystem-c">csystem</a>, <a href="#cexec">cexec</a></p>
 
 <p>Loaded on demand: <a href="#status_code">%status_code</a></p>
 
@@ -79,7 +79,13 @@
 <p>Replies with the given string as plain/text, and then exits.</p>
 
 </dd>
-<dt id="reply_html-s">reply_html( $s )</dt>
+<dt id="reply_file-fn">reply_file( $fn )</dt>
+<dd>
+
+<p>Replies with the file content pointed to by the given filename, and then exits.</p>
+
+</dd>
+<dt id="reply_html-d">reply_html( $d )</dt>
 <dd>
 
 <p>Replies with the given string as HTML, and then exits.</p>
@@ -134,6 +140,8 @@
     fail 308 , redirect =&gt; &#39;https://perlmaven.com/&#39;; # Redirecting with another code than 302.</code></pre>
 
 <h1 id="DEPENDENCIES">DEPENDENCIES</h1>
+
+<p>File::Basename</p>
 
 <p>File::Spec</p>
 

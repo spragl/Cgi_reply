@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# t/cgi_reply-1.t
+# t/cgi_reply-7.t
 use strict;
 use experimental qw(signatures);
 
