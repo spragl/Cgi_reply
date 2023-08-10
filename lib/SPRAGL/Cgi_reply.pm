@@ -10,7 +10,7 @@ use strict;
 use experimental qw(signatures);
 use Exporter qw(import);
 
-our $VERSION = 1.21;
+our $VERSION = 1.30;
 
 use File::Spec ();
 use File::Basename qw(basename);
@@ -25,8 +25,9 @@ our @EXPORT = qwac '
     reply_file # Send file and exit.
     reply_html # Send HTML reply and exit.
     reply_json # Send JSON reply and exit.
-    csystem    # CGI system command.
+    set_header # Add or overwrite headers.
     cexec      # CGI exec command.
+    csystem    # CGI system command. Deprecated.
     ';
 
 our @EXPORT_OK = qwac '
@@ -329,15 +330,11 @@ sub reply_json {
     };
 
 
-sub csystem( $c ) {
-    my $out;
-    if ($^O eq 'MSWin32') {
-        $out = qx[start /b ${c}];
-        }
-    else {
-        $out = qx[${c} 2>/dev/null];
+sub set_header( %h ) {
+    for my $h (keys %h) {
+        next if not defined $h{$h};
+        $header{hnorm($h)} = $h{$h};
         };
-    return $out;
     };
 
 
@@ -349,6 +346,19 @@ sub cexec( $c ) {
     $cr = $sr;
     bless $sr , 'SPRAGL::Cgi_reply';
     return $sr;
+    };
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+sub csystem( $c ) {
+    my $out;
+    if ($^O eq 'MSWin32') {
+        $out = qx[start /b ${c}];
+        }
+    else {
+        $out = qx[${c} 2>/dev/null];
+        };
+    return $out;
     };
 
 # --------------------------------------------------------------------------- #
@@ -363,7 +373,7 @@ SPRAGL::Cgi_reply - Simple HTTP replies.
 
 =head1 VERSION
 
-1.21
+1.30
 
 =head1 SYNOPSIS
 
@@ -378,7 +388,7 @@ Simple module for sending simple HTTP replies. Geared towards CGI scripts.
 
 CGI is simple and quick to code for, even though it is not so performant or fashionable. It nevertheless is handy when making quick and dirty web services that are not going to see a lot of load. HTTP Routing is handled by the file system. Adding or removing functionality is easy and orthogonal, like playing with Lego bricks.
 
-The reply methods in SPRAGL::Cgi_reply will exit when they have been called. The exit is based on "die". So it is catchable, END blocks will execute, et cetera.
+The reply methods in SPRAGL::Cgi_reply will exit when they have been called. The exit is based on "die", so it is catchable.
 
 =head1 FUNCTIONS AND VARIABLES
 
@@ -389,7 +399,7 @@ L<reply|/reply( $s )>,
 L<reply_file|/reply_file( $fn )>,
 L<reply_html|/reply_html( $d )>,
 L<reply_json|/reply_json( $hr )>,
-L<csystem|/csystem( $c )>,
+L<set_header|/set_header( %h )>,
 L<cexec|/cexec ...>
 
 Loaded on demand:
@@ -399,9 +409,9 @@ L<%status_code|/%status_code>
 
 =item fail( $c )
 
-Replies with the given return code plus the standard return message attached to that, and then exits. Can be given a second parameter, a string, to replace the standard return message with. As in:
+Replies with the given return code plus the standard return message attached to that, and then exits. It can be given a second parameter, a string, to replace the standard return message with. As in:
 
-    fail 404 , 'Lost in Space.'; # Instead of just fail 404;
+    fail 404 , 'Lost in Space.'; # Instead of just "fail 404;".
 
 =item redirect( $u )
 
@@ -423,9 +433,9 @@ Replies with the given string as HTML, and then exits.
 
 Replies with the given hashref transformed into JSON, and then exits.
 
-=item csystem( $c )
+=item set_header( %h )
 
-CGI system. Runs the given command and returns the output. Your script will wait for it to complete.
+Add and or overwrite the headers that are going to be used in a reply.
 
 =item cexec ...
 
@@ -458,6 +468,16 @@ Examples:
     fail 503 , 'We are down at the moment, please try again later' , 'Retry-After' => $t;
 
     fail 308 , redirect => 'https://perlmaven.com/'; # Redirecting with another code than 302.
+
+=head2 DEPRECATED
+
+=over
+
+=item csystem( $c )
+
+A CGI system command. Does pretty much what system already does, so use that instead. It is loaded by default.
+
+=back
 
 =head1 DEPENDENCIES
 

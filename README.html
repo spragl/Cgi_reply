@@ -19,6 +19,7 @@
   <li><a href="#FUNCTIONS-AND-VARIABLES">FUNCTIONS AND VARIABLES</a>
     <ul>
       <li><a href="#OPTIONAL-NAMED-PARAMETERS">OPTIONAL NAMED PARAMETERS</a></li>
+      <li><a href="#DEPRECATED">DEPRECATED</a></li>
     </ul>
   </li>
   <li><a href="#DEPENDENCIES">DEPENDENCIES</a></li>
@@ -34,7 +35,7 @@
 
 <h1 id="VERSION">VERSION</h1>
 
-<p>1.21</p>
+<p>1.30</p>
 
 <h1 id="SYNOPSIS">SYNOPSIS</h1>
 
@@ -49,11 +50,11 @@
 
 <p>CGI is simple and quick to code for, even though it is not so performant or fashionable. It nevertheless is handy when making quick and dirty web services that are not going to see a lot of load. HTTP Routing is handled by the file system. Adding or removing functionality is easy and orthogonal, like playing with Lego bricks.</p>
 
-<p>The reply methods in SPRAGL::Cgi_reply will exit when they have been called. The exit is based on &quot;die&quot;. So it is catchable, END blocks will execute, et cetera.</p>
+<p>The reply methods in SPRAGL::Cgi_reply will exit when they have been called. The exit is based on &quot;die&quot;, so it is catchable.</p>
 
 <h1 id="FUNCTIONS-AND-VARIABLES">FUNCTIONS AND VARIABLES</h1>
 
-<p>Loaded by default: <a href="#fail-c">fail</a>, <a href="#redirect-u">redirect</a>, <a href="#reply-s">reply</a>, <a href="#reply_file-fn">reply_file</a>, <a href="#reply_html-d">reply_html</a>, <a href="#reply_json-hr">reply_json</a>, <a href="#csystem-c">csystem</a>, <a href="#cexec">cexec</a></p>
+<p>Loaded by default: <a href="#fail-c">fail</a>, <a href="#redirect-u">redirect</a>, <a href="#reply-s">reply</a>, <a href="#reply_file-fn">reply_file</a>, <a href="#reply_html-d">reply_html</a>, <a href="#reply_json-hr">reply_json</a>, <a href="#set_header-h">set_header</a>, <a href="#cexec">cexec</a></p>
 
 <p>Loaded on demand: <a href="#status_code">%status_code</a></p>
 
@@ -62,9 +63,9 @@
 <dt id="fail-c">fail( $c )</dt>
 <dd>
 
-<p>Replies with the given return code plus the standard return message attached to that, and then exits. Can be given a second parameter, a string, to replace the standard return message with. As in:</p>
+<p>Replies with the given return code plus the standard return message attached to that, and then exits. It can be given a second parameter, a string, to replace the standard return message with. As in:</p>
 
-<pre><code>    fail 404 , &#39;Lost in Space.&#39;; # Instead of just fail 404;</code></pre>
+<pre><code>    fail 404 , &#39;Lost in Space.&#39;; # Instead of just &quot;fail 404;&quot;.</code></pre>
 
 </dd>
 <dt id="redirect-u">redirect( $u )</dt>
@@ -97,10 +98,10 @@
 <p>Replies with the given hashref transformed into JSON, and then exits.</p>
 
 </dd>
-<dt id="csystem-c">csystem( $c )</dt>
+<dt id="set_header-h">set_header( %h )</dt>
 <dd>
 
-<p>CGI system. Runs the given command and returns the output. Your script will wait for it to complete.</p>
+<p>Add and or overwrite the headers that are going to be used in a reply.</p>
 
 </dd>
 <dt id="cexec">cexec ...</dt>
@@ -138,6 +139,18 @@
     fail 503 , &#39;We are down at the moment, please try again later&#39; , &#39;Retry-After&#39; =&gt; $t;
 
     fail 308 , redirect =&gt; &#39;https://perlmaven.com/&#39;; # Redirecting with another code than 302.</code></pre>
+
+<h2 id="DEPRECATED">DEPRECATED</h2>
+
+<dl>
+
+<dt id="csystem-c">csystem( $c )</dt>
+<dd>
+
+<p>A CGI system command. Does pretty much what system already does, so use that instead. It is loaded by default.</p>
+
+</dd>
+</dl>
 
 <h1 id="DEPENDENCIES">DEPENDENCIES</h1>
 
